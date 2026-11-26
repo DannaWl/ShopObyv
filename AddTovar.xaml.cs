@@ -44,8 +44,6 @@ namespace ShopObyv.View
 
         private void Button_Click(object sender, RoutedEventArgs e)
         {
-            Admin admin = new Admin(); 
-            admin.Show();
             this.Close();   
         }
 
