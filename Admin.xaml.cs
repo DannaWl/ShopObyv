@@ -29,7 +29,7 @@ namespace ShopObyv.View
         {
             InitializeComponent();
             BtnAddTovar.Visibility = Visibility.Visible;
-            BtnAddZakaz.Visibility = Visibility.Collapsed;
+            BtnAddZakaz.Visibility = Visibility.Visible;
 
             viewTovar = new ViewTovar();
             FrameAdmin.Content = viewTovar;
@@ -116,8 +116,7 @@ namespace ShopObyv.View
         private void ButtonClickAddTovar(object sender, RoutedEventArgs e)
         {
             AddTovar addTovar = new AddTovar();
-            addTovar.Show();
-            this.Close();
+            addTovar.ShowDialog();
         }
 
         private void ButtonClickZakaz(object sender, RoutedEventArgs e)
@@ -140,8 +139,7 @@ namespace ShopObyv.View
         private void ButtonClickAddZakaz(object sender, RoutedEventArgs e)
         {
             AddOrder addOrder = new AddOrder();
-            addOrder.Show();
-            this.Close();
+            addOrder.ShowDialog();
         }
 
         private void ButtonClickPrintTovarPdf(object sender, RoutedEventArgs e)
