@@ -11,59 +11,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="image\1.jpg" />
-    <None Remove="image\10.jpg" />
-    <None Remove="image\2.jpg" />
-    <None Remove="image\3.jpg" />
-    <None Remove="image\4.jpg" />
-    <None Remove="image\5.jpg" />
-    <None Remove="image\6.jpg" />
-    <None Remove="image\7.jpg" />
-    <None Remove="image\8.jpg" />
-    <None Remove="image\9.jpg" />
-    <None Remove="image\picture.png" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Content Include="Icon.ico">
+    <Content Include="image\Icon.ico">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-  </ItemGroup>
-
-  <ItemGroup>
-    <Resource Include="image\1.jpg">
-      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
-    </Resource>
-    <Resource Include="image\10.jpg">
-      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
-    </Resource>
-    <Resource Include="image\2.jpg">
-      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
-    </Resource>
-    <Resource Include="image\3.jpg">
-      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
-    </Resource>
-    <Resource Include="image\4.jpg">
-      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
-    </Resource>
-    <Resource Include="image\5.jpg">
-      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
-    </Resource>
-    <Resource Include="image\6.jpg">
-      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
-    </Resource>
-    <Resource Include="image\7.jpg">
-      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
-    </Resource>
-    <Resource Include="image\8.jpg">
-      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
-    </Resource>
-    <Resource Include="image\9.jpg">
-      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
-    </Resource>
-    <Resource Include="image\picture.png">
-      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
-    </Resource>
   </ItemGroup>
 
   <ItemGroup>
