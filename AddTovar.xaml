@@ -1,0 +1,145 @@
+﻿<Window x:Class="ShopObyv.View.AddTovar"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:ShopObyv.View"
+        mc:Ignorable="d"
+        Title="Добавление товара" 
+        Height="550"
+        Width="600" 
+        Loaded="Window_Loaded">
+    
+    <Grid x:Name="Load">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition/>
+            <ColumnDefinition/>
+        </Grid.ColumnDefinitions>
+
+        <Grid.RowDefinitions>
+            <RowDefinition Height="auto"/>
+            <RowDefinition Height="auto"/>
+            <RowDefinition Height="auto"/>
+            <RowDefinition Height="auto"/>
+        </Grid.RowDefinitions>
+
+        <Button Content="Назад" 
+                Grid.Column="1"
+                Height="40"
+                Width="100"
+                Margin="5"
+                HorizontalAlignment="Right" Click="Button_Click"/>
+        
+        <StackPanel Orientation="Vertical"
+                    HorizontalAlignment="Right"
+                    Margin="10" 
+                    Grid.Row="1">
+            
+            <TextBlock Text="Название товара "
+                       Margin="7" />
+            
+            <TextBlock Text="Фото товара "
+                        Margin="7"/>
+            
+            <TextBlock Text="Категория товара "
+                        Margin="7"/>
+            
+            <TextBlock Text="Описание "
+                        Margin="6"/>
+            
+            <TextBlock Text="Производитель "
+                        Margin="7"/>
+            
+            <TextBlock Text="Поставщик"
+                        Margin="7"/>
+            
+            <TextBlock Text="Цена "
+                        Margin="7"/>
+            
+            <TextBlock Text="Единица измерения "
+                        Margin="7"/>
+            
+            <TextBlock Text="Количество на складе"
+                        Margin="6"/>
+            
+            <TextBlock Text="Действующая скидка"
+                        Margin="6"/>
+        </StackPanel>
+
+        <StackPanel Orientation="Vertical" 
+                    HorizontalAlignment="Left"
+                    Margin="10" 
+                    Grid.Column="1"
+                    Grid.Row="1">
+            
+            <TextBox x:Name="Ntovara"
+                      Margin="5"
+                     Width="200"
+                     Text="{Binding NameTovar, UpdateSourceTrigger=PropertyChanged}"/>
+            
+            <TextBox x:Name="PhotoTovara"
+                     Margin="5"
+                     Width="200"
+                     Text="{Binding Image, UpdateSourceTrigger=PropertyChanged}"/>
+            
+           <ComboBox x:Name="CategoryComboBox"
+                     Margin="5"
+                     Width="200"
+                     SelectedItem="{Binding Category}"/>
+            
+            <TextBox x:Name="DiscriptionTovar"
+                     Margin="5"
+                     Width="200"
+                     Text="{Binding Description, UpdateSourceTrigger=PropertyChanged}"/>
+
+            <ComboBox x:Name="ManufactureComboBox"
+                        Margin="5"
+                        Width="200"
+                      SelectedItem="{Binding Manufacture}"/>
+            
+            <ComboBox x:Name="SupplierComboBox"
+                        Margin="5"
+                        Width="200"
+                      SelectedItem="{Binding Supplier}"/>
+
+            <TextBox x:Name="PriceTovar"
+                      Margin="5"
+                      Width="200"
+                     Text="{Binding Price, UpdateSourceTrigger=PropertyChanged}"/>
+            
+            <ComboBox x:Name="UnitComboBox"
+                        Margin="5"
+                        Width="200"
+                      SelectedItem="{Binding Unit}"
+                      />
+            
+            <TextBox x:Name="UnitstorageTovar"
+                      Margin="5"
+                      Width="200"
+                     Text="{Binding UnitStorage, UpdateSourceTrigger=PropertyChanged}"/>
+
+
+            <TextBox x:Name="DiscountTovar"
+                      Margin="5"
+                      Width="200"
+                     Text="{Binding Discount, UpdateSourceTrigger=PropertyChanged}"/>
+        </StackPanel>
+        
+        <StackPanel Grid.Row="2" 
+                    Margin="10"
+                    Grid.ColumnSpan="2">
+            
+        <Button Content="Сохранить"
+                Height="40"
+                Width="200"
+                Margin="5"
+                Click="ButtonClickSaveTovar"/>
+
+        <Button Content="Удалить"
+                 Height="40"
+                 Width="200"
+                 Margin="5"
+                Click="ButtonClickRemoveTovar"/>
+        </StackPanel>
+    </Grid>
+</Window>
