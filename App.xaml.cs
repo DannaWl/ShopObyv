@@ -1,7 +1,9 @@
-﻿using System.Configuration;
+﻿using QuestPDF.Infrastructure;
+using ShopObyv.Models;
+using System;
+using System.Configuration;
 using System.Data;
 using System.Windows;
-using QuestPDF.Infrastructure;
 
 namespace ShopObyv
 {
@@ -13,6 +15,17 @@ namespace ShopObyv
         public App()
         {
             QuestPDF.Settings.License = LicenseType.Community;
+        }
+
+        protected override void OnStartup(StartupEventArgs e)
+        {
+            base.OnStartup(e);
+
+            // Создаём БД, если её ещё нет
+            using (var context = new AppDbContextclear())
+            {
+                context.Database.EnsureCreated();
+            }
         }
     }
 
