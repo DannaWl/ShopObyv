@@ -19,10 +19,11 @@ namespace ShopObyv.View
     public partial class AddOrder : Window
     {
         private Zakaz? context;
+        private User? us;
         private SostavZakaza? currentSostav;
         private readonly AppDbContextclear db = new AppDbContextclear();
 
-        public AddOrder()
+        public AddOrder(User? user)
         {
             InitializeComponent();
             LoadComboBoxes();
@@ -32,7 +33,7 @@ namespace ShopObyv.View
                 DateOrder = DateTime.Now,
                 DarteDilivery = DateTime.Now.AddDays(3),
                 Statys = "Новый",
-                LoginUsers = "Admin"
+                LoginUsers = user.Login
             };
 
             DataContext = context;
