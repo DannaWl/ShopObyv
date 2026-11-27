@@ -1,4 +1,10 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.Win32;
+using QuestPDF.Fluent;
+using QuestPDF.Helpers;
+using QuestPDF.Infrastructure;
+using PdfColors = QuestPDF.Helpers.Colors;
+using System;
 using ShopObyv.Models;
 using System;
 using System.Collections.Generic;
@@ -148,6 +154,165 @@ namespace ShopObyv.View
             public string Manufacturer { get; set; } = string.Empty;
             public int OrderedPairs { get; set; }
             public double BarWidth { get; set; }
+        }
+
+        private void ButtonPrintToPdf_Click(object sender, RoutedEventArgs e)
+        {
+            if (StartDatePicker.SelectedDate is not DateTime start ||
+        EndDatePicker.SelectedDate is not DateTime end)
+            {
+                MessageBox.Show(
+                    "Выберите период для экспорта.",
+                    "Экспорт в PDF",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Warning);
+                return;
+            }
+
+            var from = start.Date;
+            var toExclusive = end.Date.AddDays(1);
+
+            if (toExclusive <= from)
+            {
+                MessageBox.Show(
+                    "Дата окончания периода должна быть больше даты начала.",
+                    "Экспорт в PDF",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Warning);
+                return;
+            }
+
+            var dialog = new SaveFileDialog
+            {
+                Filter = "PDF документы (*.pdf)|*.pdf",
+                FileName = $"Аналитика_заказы_{DateTime.Now:dd.MM.yyyy}.pdf",
+                DefaultExt = ".pdf",
+                AddExtension = true
+            };
+
+            if (dialog.ShowDialog() != true)
+                return;
+
+            try
+            {
+                QuestPDF.Settings.License = LicenseType.Community;
+
+                // Состав заказов за период + сам заказ + адрес ПВЗ (через навигации)
+                var items = _db.SostavZakazas
+                    .AsNoTracking()
+                    .Include(s => s.IdSostavaZakazaNavigation)
+                        .ThenInclude(z => z.PvzNavigation)
+                    .Where(s => s.IdSostavaZakazaNavigation.DateOrder != null
+                             && s.IdSostavaZakazaNavigation.DateOrder >= from
+                             && s.IdSostavaZakazaNavigation.DateOrder < toExclusive)
+                    .OrderBy(s => s.IdSostavaZakazaNavigation.DateOrder)
+                    .ThenBy(s => s.IdSostavaZakaza)
+                    .ToList();
+
+                string formedBy = UserInfoTextBlock.Text;
+                string formedRole = UserRoleTextBlock.Text;
+
+                Document.Create(container =>
+                {
+                    container.Page(page =>
+                    {
+                        page.Size(PageSizes.A4);           // портрет
+                        page.Margin(14);
+                        page.DefaultTextStyle(x => x.FontSize(10));
+
+                        page.Header().Column(col =>
+                        {
+                            col.Item().Text($"Аналитика заказов (всего: {items.Count})")
+                                .FontSize(15).Bold();
+                            col.Item().Text(
+                                $"Период: {from:dd.MM.yyyy} — {end:dd.MM.yyyy} | " +
+                                $"Сформировал: {formedBy} ({formedRole}) | " +
+                                $"Дата: {DateTime.Now:dd.MM.yyyy HH:mm}")
+                                .FontSize(9).FontColor(PdfColors.Grey.Darken1);
+                            col.Item().PaddingTop(4)
+                                .LineHorizontal(0.8f)
+                                .LineColor(PdfColors.Grey.Lighten1);
+                        });
+
+                        page.Content().PaddingTop(6).Column(col =>
+                        {
+                            col.Spacing(6);
+
+                            if (items.Count == 0)
+                            {
+                                col.Item().Text("Заказов за выбранный период не найдено.")
+                                    .Italic().FontColor(PdfColors.Grey.Darken1);
+                                return;
+                            }
+
+                            foreach (var item in items)
+                            {
+                                var z = item.IdSostavaZakazaNavigation;
+                                var p = z.PvzNavigation;
+
+                                col.Item().Row(row =>
+                                {
+                                    // Левая карточка
+                                    row.RelativeItem()
+                                        .Border(1f).BorderColor(PdfColors.Black)
+                                        .Padding(8)
+                                        .Column(card =>
+                                        {
+                                            card.Item().Text(txt =>
+                                            {
+                                                txt.Span("Артикул: ").Bold().FontSize(16);
+                                                txt.Span(item.ArticleZakaa).Bold().FontSize(16);
+                                            });
+                                            card.Item().Text($"Статус: {z.Statys}");
+                                            card.Item().Text(
+                                                $"ПВЗ: {p.Gorod}, {p.Street}, {p.Dom}");
+                                            card.Item().Text(
+                                                $"Дата заказа: {z.DateOrder:dd.MM.yyyy}");
+                                        });
+
+                                    // Правая карточка «Дата доставки»
+                                    row.ConstantItem(150)
+                                        .Border(3f).BorderColor(PdfColors.Black)
+                                        .Padding(8)
+                                        .AlignMiddle()
+                                        .Column(card =>
+                                        {
+                                            card.Item().AlignCenter().Text("Дата доставки");
+                                            card.Item().AlignCenter()
+                                                .Text($"{z.DarteDilivery:dd.MM.yyyy}")
+                                                .FontSize(16);
+                                        });
+                                });
+                            }
+                        });
+
+                        page.Footer().AlignRight().Text(txt =>
+                        {
+                            txt.Span("Стр. ");
+                            txt.CurrentPageNumber();
+                            txt.Span(" из ");
+                            txt.TotalPages();
+                        });
+                    });
+                }).GeneratePdf(dialog.FileName);
+
+                MessageBox.Show(
+                    $"PDF-файл сохранён:\n{dialog.FileName}",
+                    "Экспорт в PDF",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Information);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(
+                    $"Не удалось сформировать PDF: {ex.Message}\n\n" +
+                    "Порядок действий:\n" +
+                    "1. Закройте файл, если он уже открыт в другой программе.\n" +
+                    "2. Выберите другую папку (например, «Документы») и повторите сохранение.",
+                    "Ошибка экспорта в PDF",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Error);
+            }
         }
     }
 }
