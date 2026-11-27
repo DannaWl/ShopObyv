@@ -29,7 +29,7 @@ namespace ShopObyv.View
         {
             InitializeComponent();
             BtnAddTovar.Visibility = Visibility.Visible;
-            BtnAddZakaz.Visibility = Visibility.Visible;
+            BtnAddZakaz.Visibility = Visibility.Collapsed;
 
             viewTovar = new ViewTovar();
             FrameAdmin.Content = viewTovar;
@@ -138,122 +138,122 @@ namespace ShopObyv.View
 
         private void ButtonClickAddZakaz(object sender, RoutedEventArgs e)
         {
-            AddOrder addOrder = new AddOrder();
+            AddOrder addOrder = new AddOrder(_currentUser);
             addOrder.ShowDialog();
         }
 
-        private void ButtonClickPrintTovarPdf(object sender, RoutedEventArgs e)
-        {
-            var dialog = new SaveFileDialog
-            {
-                Filter = "PDF документы (*.pdf)|*.pdf",
-                FileName = $"Список_товаров_{DateTime.Now:yyyy-MM-dd}.pdf",
-                DefaultExt = ".pdf",
-                AddExtension = true
-            };
+        //private void ButtonClickPrintTovarPdf(object sender, RoutedEventArgs e)
+        //{
+        //    var dialog = new SaveFileDialog
+        //    {
+        //        Filter = "PDF документы (*.pdf)|*.pdf",
+        //        FileName = $"Список_товаров_{DateTime.Now:yyyy-MM-dd}.pdf",
+        //        DefaultExt = ".pdf",
+        //        AddExtension = true
+        //    };
 
-            if (dialog.ShowDialog() != true)
-                return;
+        //    if (dialog.ShowDialog() != true)
+        //        return;
 
-            try
-            {
-                QuestPDF.Settings.License = LicenseType.Community;
+        //    try
+        //    {
+        //        QuestPDF.Settings.License = LicenseType.Community;
 
-                List<Tovar> allProducts = GetCurrentProductsList();
+        //        List<Tovar> allProducts = GetCurrentProductsList();
 
-                // Для небольшого списка (до 80 товаров) рендерим визуальные карточки как скриншоты;
-                // для больших списков (сотни и тысячи товаров) строим быстрый многостраничный PDF без зависаний
-                List<byte[]>? cardScreenshots = allProducts.Count <= 80
-                    ? TryCaptureProductCards(FrameAdmin, allProducts.Count)
-                    : null;
+        //        // Для небольшого списка (до 80 товаров) рендерим визуальные карточки как скриншоты;
+        //        // для больших списков (сотни и тысячи товаров) строим быстрый многостраничный PDF без зависаний
+        //        List<byte[]>? cardScreenshots = allProducts.Count <= 80
+        //            ? TryCaptureProductCards(FrameAdmin, allProducts.Count)
+        //            : null;
 
-                Document.Create(container =>
-                {
-                    container.Page(page =>
-                    {
-                        page.Size(PageSizes.A4.Landscape());
-                        page.Margin(14);
-                        page.DefaultTextStyle(x => x.FontSize(10));
+        //        Document.Create(container =>
+        //        {
+        //            container.Page(page =>
+        //            {
+        //                page.Size(PageSizes.A4.Landscape());
+        //                page.Margin(14);
+        //                page.DefaultTextStyle(x => x.FontSize(10));
 
-                        page.Header().Column(col =>
-                        {
-                            col.Item().Text($"Список товаров (всего: {allProducts.Count})").FontSize(15).Bold();
-                            col.Item().Text($"Сформировал: {CurrentUserLabel.Content} ({_currentUser?.Role ?? "Администратор"}) | Дата: {DateTime.Now:dd.MM.yyyy HH:mm}")
-                                .FontSize(9).FontColor(PdfColors.Grey.Darken1);
-                            col.Item().PaddingTop(4).LineHorizontal(0.8f).LineColor(PdfColors.Grey.Lighten1);
-                        });
+        //                page.Header().Column(col =>
+        //                {
+        //                    col.Item().Text($"Список товаров (всего: {allProducts.Count})").FontSize(15).Bold();
+        //                    col.Item().Text($"Сформировал: {CurrentUserLabel.Content} ({_currentUser?.Role ?? "Администратор"}) | Дата: {DateTime.Now:dd.MM.yyyy HH:mm}")
+        //                        .FontSize(9).FontColor(PdfColors.Grey.Darken1);
+        //                    col.Item().PaddingTop(4).LineHorizontal(0.8f).LineColor(PdfColors.Grey.Lighten1);
+        //                });
 
-                        page.Content().PaddingTop(6).AlignTop().Column(col =>
-                        {
-                            col.Spacing(6);
+        //                page.Content().PaddingTop(6).AlignTop().Column(col =>
+        //                {
+        //                    col.Spacing(6);
 
-                            if (cardScreenshots != null && cardScreenshots.Count > 0)
-                            {
-                                foreach (var img in cardScreenshots)
-                                {
-                                    col.Item().AlignTop().Image(img).FitWidth();
-                                }
-                            }
-                            else
-                            {
-                                foreach (var item in allProducts)
-                                {
-                                    string priceInfo = item.Discount > 0 && item.NewPrice.HasValue
-                                        ? $"Цена: {item.Price:0.##} -> {item.NewPrice.Value:0.##} (скидка {item.Discount}%)"
-                                        : $"Цена: {item.Price:0.##} (скидка {item.Discount}%)";
+        //                    if (cardScreenshots != null && cardScreenshots.Count > 0)
+        //                    {
+        //                        foreach (var img in cardScreenshots)
+        //                        {
+        //                            col.Item().AlignTop().Image(img).FitWidth();
+        //                        }
+        //                    }
+        //                    else
+        //                    {
+        //                        foreach (var item in allProducts)
+        //                        {
+        //                            string priceInfo = item.Discount > 0 && item.NewPrice.HasValue
+        //                                ? $"Цена: {item.Price:0.##} -> {item.NewPrice.Value:0.##} (скидка {item.Discount}%)"
+        //                                : $"Цена: {item.Price:0.##} (скидка {item.Discount}%)";
 
-                                    col.Item().Border(0.8f).BorderColor(PdfColors.Grey.Lighten1).Padding(6).Column(card =>
-                                    {
-                                        card.Item().Text($"{item.NameTovar} | Артикул: {item.Article}").Bold();
-                                        if (!string.IsNullOrWhiteSpace(item.Description))
-                                            card.Item().Text($"Описание товара: {item.Description}").FontSize(9);
-                                        card.Item().Text($"Производитель: {item.Manufacture ?? "-"} | Поставщик: {item.Supplier ?? "-"}").FontSize(9);
-                                        card.Item().Text($"{priceInfo} | Единица измерения: {item.Unit ?? "-"} | На складе: {item.UnitStorage}").FontSize(9);
-                                    });
-                                    byte[]? photoBytes = TryGetProductPhotoBytes(item);
+        //                            col.Item().Border(0.8f).BorderColor(PdfColors.Grey.Lighten1).Padding(6).Column(card =>
+        //                            {
+        //                                card.Item().Text($"{item.NameTovar} | Артикул: {item.Article}").Bold();
+        //                                if (!string.IsNullOrWhiteSpace(item.Description))
+        //                                    card.Item().Text($"Описание товара: {item.Description}").FontSize(9);
+        //                                card.Item().Text($"Производитель: {item.Manufacture ?? "-"} | Поставщик: {item.Supplier ?? "-"}").FontSize(9);
+        //                                card.Item().Text($"{priceInfo} | Единица измерения: {item.Unit ?? "-"} | На складе: {item.UnitStorage}").FontSize(9);
+        //                            });
+        //                            byte[]? photoBytes = TryGetProductPhotoBytes(item);
 
-                                    col.Item().Border(0.8f).BorderColor(PdfColors.Grey.Lighten1).Padding(6).Row(row =>
-                                    {
-                                        if (photoBytes != null && photoBytes.Length > 0)
-                                        {
-                                            row.ConstantItem(75).Height(65).AlignCenter().AlignMiddle()
-                                                .Image(photoBytes).FitArea();
-                                            row.ConstantItem(10);
-                                        }
+        //                            col.Item().Border(0.8f).BorderColor(PdfColors.Grey.Lighten1).Padding(6).Row(row =>
+        //                            {
+        //                                if (photoBytes != null && photoBytes.Length > 0)
+        //                                {
+        //                                    row.ConstantItem(75).Height(65).AlignCenter().AlignMiddle()
+        //                                        .Image(photoBytes).FitArea();
+        //                                    row.ConstantItem(10);
+        //                                }
 
-                                        row.RelativeItem().Column(card =>
-                                        {
-                                            card.Item().Text($"{item.NameTovar} | Артикул: {item.Article}").Bold();
-                                            if (!string.IsNullOrWhiteSpace(item.Description))
-                                                card.Item().Text($"Описание товара: {item.Description}").FontSize(9);
-                                            card.Item().Text($"Производитель: {item.Manufacture ?? "-"} | Поставщик: {item.Supplier ?? "-"}").FontSize(9);
-                                            card.Item().Text($"{priceInfo} | Единица измерения: {item.Unit ?? "-"} | На складе: {item.UnitStorage}").FontSize(9);
-                                        });
-                                    });
-                                }
-                            }
-                        });
-                    });
-                }).GeneratePdf(dialog.FileName);
+        //                                row.RelativeItem().Column(card =>
+        //                                {
+        //                                    card.Item().Text($"{item.NameTovar} | Артикул: {item.Article}").Bold();
+        //                                    if (!string.IsNullOrWhiteSpace(item.Description))
+        //                                        card.Item().Text($"Описание товара: {item.Description}").FontSize(9);
+        //                                    card.Item().Text($"Производитель: {item.Manufacture ?? "-"} | Поставщик: {item.Supplier ?? "-"}").FontSize(9);
+        //                                    card.Item().Text($"{priceInfo} | Единица измерения: {item.Unit ?? "-"} | На складе: {item.UnitStorage}").FontSize(9);
+        //                                });
+        //                            });
+        //                        }
+        //                    }
+        //                });
+        //            });
+        //        }).GeneratePdf(dialog.FileName);
 
-                MessageBox.Show(
-                    $"PDF-файл сохранён:\n{dialog.FileName}",
-                    "Печать PDF",
-                    MessageBoxButton.OK,
-                    MessageBoxImage.Information);
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show(
-                    $"Не удалось сформировать PDF: {ex.Message}\n\n" +
-                    "Порядок действий:\n" +
-                    "1. Закройте файл, если он уже открыт в другой программе.\n" +
-                    "2. Выберите другую папку (например, «Документы») и повторите сохранение.",
-                    "Ошибка экспорта в PDF",
-                    MessageBoxButton.OK,
-                    MessageBoxImage.Error);
-            }
-        }
+        //        MessageBox.Show(
+        //            $"PDF-файл сохранён:\n{dialog.FileName}",
+        //            "Печать PDF",
+        //            MessageBoxButton.OK,
+        //            MessageBoxImage.Information);
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        MessageBox.Show(
+        //            $"Не удалось сформировать PDF: {ex.Message}\n\n" +
+        //            "Порядок действий:\n" +
+        //            "1. Закройте файл, если он уже открыт в другой программе.\n" +
+        //            "2. Выберите другую папку (например, «Документы») и повторите сохранение.",
+        //            "Ошибка экспорта в PDF",
+        //            MessageBoxButton.OK,
+        //            MessageBoxImage.Error);
+        //    }
+        //}
 
 
         private static byte[]? TryGetProductPhotoBytes(Tovar item)

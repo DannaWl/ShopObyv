@@ -108,11 +108,11 @@
                     Style="{StaticResource ButtonA}"
                     Click="ButtonClickAnalytics"/>
 
-            <Button x:Name="BtnPrintTovarPdf"
+            <!--<Button x:Name="BtnPrintTovarPdf"
                     Content="Печать PDF"
                     FontSize="16"
                     Style="{StaticResource ButtonA}"
-                    Click="ButtonClickPrintTovarPdf"/>
+                    Click="ButtonClickPrintTovarPdf"/>-->
         </StackPanel>
 
         <StackPanel x:Name="ActionButtonsPanel"
